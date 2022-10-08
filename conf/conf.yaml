@@ -1,0 +1,6 @@
+im_balance:
+  ws_addr: localhost:18080
+  tcp_addr: localhost:18081
+  conn_active_time: 300
+
+
