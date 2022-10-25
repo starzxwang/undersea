@@ -4,16 +4,13 @@ import (
 	"context"
 	"github.com/gorilla/websocket"
 	"undersea/im_balance/conf"
-	error_v2 "undersea/pkg/err"
+	"undersea/pkg/log"
 	"undersea/pkg/message"
 )
-
-
 
 type BalanceUseCase struct {
 	conf conf.Conf
 }
-
 
 func NewBalanceUseCase(conf conf.Conf) *BalanceUseCase {
 	return &BalanceUseCase{conf: conf}
@@ -31,7 +28,7 @@ func (uc *BalanceUseCase) HandlePickNodeIpMessage(ctx context.Context, conn *web
 	}
 
 	if ip == "" {
-		err = error_v2.PrintError(ctx, err, "所有im节点均不可用")
+		log.E(ctx, err).Msgf("所有im节点均不可用")
 		return
 	}
 
@@ -40,7 +37,7 @@ func (uc *BalanceUseCase) HandlePickNodeIpMessage(ctx context.Context, conn *web
 		Ip: ip,
 	}, message.MesTypeReplyPickNodeIp, "")
 	if err != nil {
-		err = error_v2.PrintError(ctx, err, "所有im节点均不可用")
+		log.E(ctx, err).Msgf("所有im节点均不可用")
 		return
 	}
 	return

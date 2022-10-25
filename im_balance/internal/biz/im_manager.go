@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 	"undersea/im_balance/conf"
-	error_v2 "undersea/pkg/err"
 	"undersea/pkg/log"
 	"undersea/pkg/message"
 )
@@ -17,9 +16,9 @@ var (
 )
 
 type imManagerServer struct {
-	ipList map[string]chan struct{} // 当前可用的im节点列表
-	currentIndex int // 当前请求所选ip的索引值
-	rwLock sync.RWMutex
+	ipList       map[string]chan struct{} // 当前可用的im节点列表
+	currentIndex int                      // 当前请求所选ip的索引值
+	rwLock       sync.RWMutex
 }
 
 type ImManagerUseCase struct {
@@ -34,7 +33,7 @@ func (uc *ImManagerUseCase) HandleHeartBeatMessage(ctx context.Context, conn net
 	var sourceMes *message.HeartBeatMessage
 	err = json.Unmarshal([]byte(mes.Data), &sourceMes)
 	if err != nil {
-		err = error_v2.PrintError(ctx, err, "json.Unmarshal err")
+		log.E(ctx, err).Msgf("json.Unmarshal err")
 		return
 	}
 
@@ -71,13 +70,13 @@ func (uc *ImManagerUseCase) listenImHeartBeat(ip string, conn net.Conn) {
 		nodeChan := imServer.ipList[ip]
 		imServer.rwLock.RUnlock()
 		select {
-		case <- nodeChan:
+		case <-nodeChan:
 			err := conn.SetDeadline(time.Now().Add(uc.conf.ConnActiveTime))
 			if err != nil {
 				log.E(ctx, err).Msgf("listenImNodeChan->conn.SetDeadline err")
 				continue
 			}
-		case <- time.After(uc.conf.ConnActiveTime):
+		case <-time.After(uc.conf.ConnActiveTime):
 			imServer.rwLock.Lock()
 			delete(imServer.ipList, ip)
 			imServer.rwLock.Unlock()

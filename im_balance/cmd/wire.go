@@ -1,3 +1,4 @@
+//go:build wireinject
 // +build wireinject
 
 package main
@@ -7,6 +8,7 @@ import (
 	"github.com/google/wire"
 	"undersea/im_balance/conf"
 	"undersea/im_balance/internal/biz"
+	server2 "undersea/im_balance/internal/server"
 	"undersea/im_balance/internal/service"
 )
 
@@ -15,6 +17,8 @@ func initApp() (*app, error) {
 		context.Background,
 		conf.NewConf,
 		newApp,
+		server2.NewWebsocketServer,
+		server2.NewTcpServer,
 		service.NewBalanceService,
 		service.NewImManagerService,
 		biz.NewImManagerUseCase,

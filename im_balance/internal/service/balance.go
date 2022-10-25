@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gorilla/websocket"
 	"undersea/im_balance/internal/biz"
-	error_v2 "undersea/pkg/err"
+	"undersea/pkg/log"
 	"undersea/pkg/message"
 )
 
@@ -27,7 +27,7 @@ func (s *BalanceService) HandleClientMessage(conn *websocket.Conn, data []byte) 
 	mes, err := message.ConvertBytes2Message(ctx, data)
 
 	if err != nil {
-		err = error_v2.PrintError(ctx, err, "message is not valid")
+		log.E(ctx, err).Msgf("message is not valid")
 		return
 	}
 
@@ -39,7 +39,7 @@ func (s *BalanceService) HandleClientMessage(conn *websocket.Conn, data []byte) 
 	}
 
 	if err != nil {
-		err = error_v2.PrintError(ctx, err, "handle client msg err")
+		log.E(ctx, err).Msgf("handle client msg err")
 		return
 	}
 
