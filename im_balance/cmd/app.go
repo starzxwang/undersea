@@ -16,13 +16,13 @@ type app struct {
 	servers []server2.Server
 }
 
-func newApp(ctx context.Context, tcpServer *server2.TcpServer, websocketServer *server2.WebsocketServer) *app {
+func newApp(ctx context.Context, grpcServer *server2.GrpcServer, websocketServer *server2.WebsocketServer) *app {
 	ctx, cancel := context.WithCancel(context.Background())
 	app := &app{
 		ctx:    ctx,
 		cancel: cancel,
 	}
-	app.servers = append(app.servers, tcpServer, websocketServer)
+	app.servers = append(app.servers, grpcServer, websocketServer)
 	return app
 }
 

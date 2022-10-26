@@ -1,5 +1,6 @@
 package message
 
 type HeartBeatMessage struct {
-	ImManagerIp string `json:"im_manager_ip"`
+	ServiceName string `json:"service_name"`
+	Ip          string `json:"ip"`
 }

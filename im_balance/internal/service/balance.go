@@ -34,7 +34,7 @@ func (s *BalanceService) HandleClientMessage(conn *websocket.Conn, data []byte) 
 	switch mes.Type {
 	case message.MesTypePickNodeIp:
 		// 客户端需要一个im节点ip
-		err = s.balanceUseCase.HandlePickNodeIpMessage(ctx, conn)
+		err = s.balanceUseCase.HandlePickIpMessage(ctx, conn)
 	default:
 	}
 

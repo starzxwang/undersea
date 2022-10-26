@@ -37,8 +37,8 @@ func (s *WebsocketServer) Start(ctx context.Context) (err error) {
 	http.HandleFunc("/ws", s.wsHandler)
 
 	//服务端启动
-	log.I(ctx).Msgf("负载均衡模块开始监听websocket端口：%s", s.conf.WsAddr)
-	err = http.ListenAndServe(s.conf.WsAddr, nil)
+	log.I(ctx).Msgf("[%s]负载均衡模块开始监听websocket端口：%s", s.Name(), s.conf.Ws.Addr)
+	err = http.ListenAndServe(s.conf.Ws.Addr, nil)
 	if err != nil {
 		log.E(ctx, err).Msgf("websocket start err")
 		return
@@ -86,5 +86,6 @@ func (s *WebsocketServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebsocketServer) Stop(ctx context.Context) error {
+	log.I(ctx).Msgf("[%s]server stopping", s.Name())
 	return nil
 }

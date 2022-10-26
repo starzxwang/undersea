@@ -18,10 +18,10 @@ func initApp() (*app, error) {
 		conf.NewConf,
 		newApp,
 		server2.NewWebsocketServer,
-		server2.NewTcpServer,
+		server2.NewGrpcServer,
 		service.NewBalanceService,
-		service.NewImManagerService,
-		biz.NewImManagerUseCase,
+		service.NewHeartBeatService,
+		biz.NewHeartBeatUseCase,
 		biz.NewBalanceUseCase,
 	))
 }

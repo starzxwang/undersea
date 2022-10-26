@@ -16,16 +16,13 @@ func NewBalanceUseCase(conf conf.Conf) *BalanceUseCase {
 	return &BalanceUseCase{conf: conf}
 }
 
-func (uc *BalanceUseCase) HandlePickNodeIpMessage(ctx context.Context, conn *websocket.Conn) (err error) {
+func (uc *BalanceUseCase) HandlePickIpMessage(ctx context.Context, conn *websocket.Conn) (err error) {
 	var ip string
-	imServer.rwLock.RLock()
-	ipList := imServer.ipList
-	imServer.rwLock.RUnlock()
-	for currentIp := range ipList {
-		// 由于map的key遍历时有随机性，我们直接取第一个作为返回ip
-		ip = currentIp
-		break
-	}
+	// 这里使用随机算法获取ip
+	imServer.ipMap.Range(func(key, value any) bool {
+		ip = key.(string)
+		return false
+	})
 
 	if ip == "" {
 		log.E(ctx, err).Msgf("所有im节点均不可用")

@@ -6,15 +6,29 @@ import (
 )
 
 type Conf struct {
-	WsAddr         string        // websocket host
-	TcpAddr        string        // tcp host
-	ConnActiveTime time.Duration // tcp连接最大空闲时间，超过了就会被关闭
+	Ws struct {
+		Addr string // websocket host
+	}
+
+	Grpc struct {
+		Addr              string
+		HeartBeatInterval time.Duration
+	}
 }
 
 func NewConf() Conf {
 	return Conf{
-		WsAddr:  viper.V().GetString("im_balance.ws_addr"),
-		TcpAddr: viper.V().GetString("im_balance.tcp_addr"),
-		ConnActiveTime: time.Duration(viper.V().GetInt("im_balance.conn_active_time")) * time.Second,
+		Ws: struct {
+			Addr string
+		}{
+			Addr: viper.V().GetString("im_balance.ws_addr"),
+		},
+		Grpc: struct {
+			Addr              string
+			HeartBeatInterval time.Duration
+		}{
+			Addr:              viper.V().GetString("grpc.addr"),
+			HeartBeatInterval: time.Duration(viper.V().GetInt("grpc.heart_beat.interval")) * time.Second,
+		},
 	}
 }

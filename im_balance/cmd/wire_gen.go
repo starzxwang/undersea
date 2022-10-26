@@ -19,12 +19,12 @@ import (
 func initApp() (*app, error) {
 	contextContext := context.Background()
 	confConf := conf.NewConf()
-	imManagerUseCase := biz.NewImManagerUseCase(confConf)
-	imManagerService := service.NewImManagerService(confConf, imManagerUseCase)
-	tcpServer := server.NewTcpServer(confConf, imManagerService)
+	heartBeatUseCase := biz.NewHeartBeatUseCase(confConf)
+	heartBeatServiceServer := service.NewHeartBeatService(confConf, heartBeatUseCase)
+	grpcServer := server.NewGrpcServer(confConf, heartBeatServiceServer)
 	balanceUseCase := biz.NewBalanceUseCase(confConf)
 	balanceService := service.NewBalanceService(contextContext, balanceUseCase)
 	websocketServer := server.NewWebsocketServer(confConf, balanceService)
-	mainApp := newApp(contextContext, tcpServer, websocketServer)
+	mainApp := newApp(contextContext, grpcServer, websocketServer)
 	return mainApp, nil
 }
