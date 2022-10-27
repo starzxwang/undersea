@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/websocket"
-	"net"
 	"undersea/pkg/log"
 )
 
 const (
+	MesTypeLogin               = "LOGIN"                  // 登录消息
+	MesTypeReplyLogin          = "REPLY_LOGIN"            // 登录ack消息
+	MesTypeExit                = "EXIT"                   // 注销消息
 	MesTypePeerText            = "PEER_TEXT"              // 单聊消息
 	MesTypeReplyPeerText       = "REPLY_PEER_TEXT"        // 单聊ack消息
 	MesTypeGroupText           = "GROUP_TEXT"             // 普通群聊
@@ -18,8 +20,8 @@ const (
 	MesTypeReplySuperGroupText = "REPLY_SUPER_GROUP_TEXT" // 超级群聊ack消息
 	MesTypeReplyExit           = "REPLY_EXIT"             // 注销
 	MesTypeHeartBeat           = "HEART_BEAT"             // im的心跳
-	MesTypePickNodeIp          = "PICK_IP"                // 客户端向im_balance获取ip
-	MesTypeReplyPickNodeIp     = "REPLY_PICK_IP"
+	MesTypePickIp              = "PICK_IP"                // 客户端向im_balance获取ip
+	MesTypeReplyPickIp         = "REPLY_PICK_IP"
 )
 
 type Message struct {
@@ -29,8 +31,21 @@ type Message struct {
 	Length int    `json:"length"`
 }
 
-type PickNodeIpReplyMessage struct {
+type HeartBeatMessage struct {
+	ServiceName string `json:"service_name"`
+	Ip          string `json:"ip"`
+}
+
+type PickIpMessage struct {
+	Uid int `json:"uid"`
+}
+
+type PickIpReplyMessage struct {
 	Ip string `json:"ip"`
+}
+
+type LoginMessage struct {
+	Uid int `json:"uid"`
 }
 
 func ConvertBytes2Message(ctx context.Context, data []byte) (mes *Message, err error) {
@@ -64,29 +79,6 @@ func formatMessage(ctx context.Context, msgData interface{}, msgType string, msg
 	}
 
 	mes.Length = len(mes.Data)
-	return
-}
-
-// 发送tcp消息
-func SendTcpMessage(ctx context.Context, conn net.Conn, msgData interface{}, msgType, msgId string) (err error) {
-	mes, err := formatMessage(ctx, msgData, msgType, msgId)
-	if err != nil {
-		log.E(ctx, err).Msgf("formatMessage err")
-		return
-	}
-
-	mesBytes, err := json.Marshal(mes)
-	if err != nil {
-		log.E(ctx, err).Msgf("json.Marshal err")
-		return
-	}
-
-	_, err = conn.Write(mesBytes)
-	if err != nil {
-		log.E(ctx, err).Msgf("conn.Write err")
-		return
-	}
-
 	return
 }
 

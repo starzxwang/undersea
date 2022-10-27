@@ -1,10 +1,21 @@
 im_balance:
   ws_addr: localhost:18080
-  tcp_addr: localhost:18081
   conn_active_time: 300
   grpc:
     addr: localhost:8081
     heart_beat:
       interval: 10
+
+im_manage:
+  ws:
+    addr: localhost:18081
+    heart_beat:
+      interval: 10
+
+redis:
+  balance_db: 0
+  password:
+  addr: localhost:6379
+
 
 
