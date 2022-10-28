@@ -1,6 +1,6 @@
 im_balance:
-  ws_addr: localhost:18080
-  conn_active_time: 300
+  ws:
+    addr: localhost:18080
   grpc:
     addr: localhost:8081
     heart_beat:
@@ -12,10 +12,23 @@ im_manage:
     heart_beat:
       interval: 10
 
+im_api:
+  http:
+    addr: localhost:8080
+
 redis:
   balance_db: 0
-  password:
+  password: 12345
   addr: localhost:6379
 
-
+mysql:
+  username: root
+  password: root
+  db_name: im
+  host: localhost
+  port: 3306
+  charset: utf8mb4
+  zone: Asia%2FShanghai
+  max_open_conns: 100
+  max_idle_conns: 5
 

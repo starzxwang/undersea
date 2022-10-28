@@ -15,6 +15,10 @@ type Conf struct {
 		HeartBeatInterval time.Duration
 	}
 
+	Http struct {
+		Addr string
+	}
+
 	Redis struct {
 		Addr      string
 		UserName  string
@@ -28,14 +32,14 @@ func NewConf() Conf {
 		Ws: struct {
 			Addr string
 		}{
-			Addr: viper.V().GetString("im-balance.ws_addr"),
+			Addr: viper.V().GetString("im_balance.ws.addr"),
 		},
 		Grpc: struct {
 			Addr              string
 			HeartBeatInterval time.Duration
 		}{
-			Addr:              viper.V().GetString("im-balance.grpc.addr"),
-			HeartBeatInterval: time.Duration(viper.V().GetInt("im-balance.grpc.heart_beat.interval")) * time.Second,
+			Addr:              viper.V().GetString("im_balance.grpc.addr"),
+			HeartBeatInterval: time.Duration(viper.V().GetInt("im_balance.grpc.heart_beat.interval")) * time.Second,
 		},
 		Redis: struct {
 			Addr      string

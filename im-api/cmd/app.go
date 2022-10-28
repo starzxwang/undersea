@@ -8,7 +8,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	server2 "undersea/im-balance/internal/server"
+	server2 "undersea/im-api/internal/server"
 	"undersea/pkg/log"
 )
 
@@ -18,13 +18,13 @@ type app struct {
 	servers []server2.Server
 }
 
-func newApp(ctx context.Context, grpcServer *server2.GrpcServer, websocketServer *server2.WebsocketServer) *app {
+func newApp(ctx context.Context, httpServer *server2.HttpServer) *app {
 	ctx, cancel := context.WithCancel(context.Background())
 	app := &app{
 		ctx:    ctx,
 		cancel: cancel,
 	}
-	app.servers = append(app.servers, grpcServer, websocketServer)
+	app.servers = append(app.servers, httpServer)
 	return app
 }
 

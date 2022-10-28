@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 	server2 "undersea/im-manage/internal/server"
 	"undersea/pkg/log"
 )
@@ -44,9 +46,11 @@ func (app *app) run() (err error) {
 		wg.Add(1)
 		go func(s server2.Server) {
 			<-app.ctx.Done()
-			err = s.Stop(app.ctx)
+			ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+			defer cancel()
+			err = s.Stop(ctx)
 			if err != nil {
-				log.E(app.ctx, err).Msgf("%s stop failed", s.Name())
+				log.E(ctx, err).Msgf("%s stop failed", s.Name())
 			}
 
 			wg.Done()
@@ -69,7 +73,7 @@ func (app *app) run() (err error) {
 	}()
 
 	wg.Wait()
-	if err != nil {
+	if err != nil && !errors.Is(err, context.Canceled) {
 		return
 	}
 
