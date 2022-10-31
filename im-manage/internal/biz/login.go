@@ -8,7 +8,6 @@ import (
 	"time"
 	"undersea/im-manage/conf"
 	"undersea/pkg/message"
-	"undersea/pkg/util"
 )
 
 var (
@@ -25,21 +24,26 @@ type HeartBeatItem struct {
 	conn     *websocket.Conn
 }
 
-func NewLoginUseCase(loginRepo LoginRepo) *LoginUseCase {
+func NewLoginUseCase(conf conf.Conf, loginRepo LoginRepo) *LoginUseCase {
 	return &LoginUseCase{
+		conf:      conf,
 		loginRepo: loginRepo,
 	}
 }
 
 func (uc *LoginUseCase) Login(ctx context.Context, mes *message.LoginMessage, conn *websocket.Conn) (err error) {
 	// 这个用户是不是属于这一台机器
-	userIp := uc.loginRepo.GetUserIp(ctx, mes.Uid)
+	userIp, err := uc.loginRepo.GetUserIp(ctx, mes.Uid)
+	if err != nil {
+		err = fmt.Errorf("Login->GetUserIp err,%v", err)
+		return
+	}
 	if userIp == "" {
 		err = fmt.Errorf("该用户节点已经变更")
 		return
 	}
 
-	if util.GetIpAddr() != userIp {
+	if uc.getWsIp() != userIp {
 		err = fmt.Errorf("用户节点不匹配")
 		return
 	}
@@ -63,6 +67,10 @@ func (uc *LoginUseCase) Login(ctx context.Context, mes *message.LoginMessage, co
 	return
 }
 
+func (uc *LoginUseCase) getWsIp() string {
+	return "ws://" + uc.conf.Ws.Addr + "/ws"
+}
+
 func (uc *LoginUseCase) heartBeat(uid int, heartBeatItem *HeartBeatItem) {
 	online := true
 	for online {
@@ -78,5 +86,5 @@ func (uc *LoginUseCase) heartBeat(uid int, heartBeatItem *HeartBeatItem) {
 }
 
 type LoginRepo interface {
-	GetUserIp(ctx context.Context, uid int) (ip string)
+	GetUserIp(ctx context.Context, uid int) (ip string, err error)
 }

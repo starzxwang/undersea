@@ -9,7 +9,10 @@ package main
 import (
 	"context"
 	"undersea/im-manage/conf"
+	"undersea/im-manage/internal/biz"
+	"undersea/im-manage/internal/data"
 	"undersea/im-manage/internal/server"
+	"undersea/im-manage/internal/service"
 )
 
 // Injectors from wire.go:
@@ -18,7 +21,15 @@ func initApp() (*app, error) {
 	contextContext := context.Background()
 	confConf := conf.NewConf()
 	grpcClient := server.NewGrpcClient(contextContext, confConf)
-	websocketServer := server.NewWebsocketServer(confConf)
+	client, err := data.NewRedisClient(contextContext, confConf)
+	if err != nil {
+		return nil, err
+	}
+	loginRepo := data.NewLoginRepo(client)
+	loginUseCase := biz.NewLoginUseCase(confConf, loginRepo)
+	loginService := service.NewLoginService(loginUseCase)
+	manageService := service.NewManageService(loginService)
+	websocketServer := server.NewWebsocketServer(confConf, manageService)
 	mainApp := newApp(contextContext, grpcClient, websocketServer)
 	return mainApp, nil
 }

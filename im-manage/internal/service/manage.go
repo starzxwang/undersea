@@ -43,6 +43,7 @@ func (s *ManageService) HandleClientMessage(conn *websocket.Conn, data []byte) {
 
 	if err != nil {
 		log.E(ctx, err).Msgf("handle client msg err,%s", mes.Type)
+		message.SendExceptionWebsocketMessage(ctx, conn)
 		return
 	}
 

@@ -31,9 +31,16 @@ func (s *LoginService) HandleLoginMessage(ctx context.Context, mes *message.Mess
 
 	err = s.loginUseCase.Login(ctx, sourceMes, conn)
 	if err != nil {
-		err = fmt.Errorf("HandleLoginMessage->Login err")
+		err = fmt.Errorf("HandleLoginMessage->Login err,%v", err)
+		message.SendExceptionWebsocketMessage(ctx, conn)
 		return
 	}
 
+	// 发送ack
+	err = message.SendWebSocketMessage(ctx, conn, &message.ReplyMessageData{}, message.MesTypeReplyLogin, "")
+	if err != nil {
+		err = fmt.Errorf("HandleLoginMessage->SendWebSocketMessage err")
+		return
+	}
 	return
 }

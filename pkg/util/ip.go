@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 )
 
-func GetIpAddr() string {
+func GetIpAddr(port int) string {
 	addrs, err1 := net.InterfaceAddrs()
 
 	if err1 != nil {
@@ -19,7 +20,7 @@ func GetIpAddr() string {
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 
 			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
+				return ipnet.IP.String() + ":" + strconv.Itoa(port)
 			}
 		}
 	}

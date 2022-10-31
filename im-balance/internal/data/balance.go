@@ -2,6 +2,8 @@ package data
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
 	"undersea/im-balance/internal/biz"
@@ -22,13 +24,23 @@ func NewBalanceRepo(rdb *redis.Client) biz.BalanceRepo {
 	}
 }
 
-func (r *BalanceRepo) GetUserIp(ctx context.Context, uid int) (ip string) {
-	return r.rdb.HGet(ctx, UserIpMappingCacheKey, strconv.Itoa(uid)).String()
+func (r *BalanceRepo) GetUserIp(ctx context.Context, uid int) (ip string, err error) {
+	ip, err = r.rdb.HGet(ctx, UserIpMappingCacheKey, strconv.Itoa(uid)).Result()
+	if errors.Is(err, redis.Nil) {
+		return "", nil
+	}
+
+	if err != nil {
+		err = fmt.Errorf("GetUserIp->hget err,%v", err)
+		return
+	}
+
+	return
 }
 
 func (r *BalanceRepo) SaveIpUser(ctx context.Context, ip string, uid int) (err error) {
 	pipe := r.rdb.Pipeline()
-	pipe.HSet(ctx, UserIpMappingCacheKey, strconv.Itoa(uid), ip).Err()
+	pipe.HSet(ctx, UserIpMappingCacheKey, strconv.Itoa(uid), ip)
 	pipe.HSet(ctx, r.genIpUserListCacheKey(ip), strconv.Itoa(uid), 1)
 	_, err = pipe.Exec(ctx)
 	return
@@ -39,16 +51,16 @@ func (r *BalanceRepo) DeleteIpUser(ctx context.Context, uid int) (err error) {
 }
 
 func (r *BalanceRepo) DeleteIp(ctx context.Context, ip string) (err error) {
-	pipe := r.rdb.Pipeline()
-	ipUserList, err := pipe.HGetAll(ctx, r.genIpUserListCacheKey(ip)).Result()
-	if err != nil {
-		return
-	}
-
+	ipUserList := r.rdb.HGetAll(ctx, r.genIpUserListCacheKey(ip)).Val()
 	uids := make([]string, 0, len(ipUserList))
 	for uid := range ipUserList {
 		uids = append(uids, uid)
 	}
+
+	fmt.Println(333333)
+	fmt.Println(uids)
+
+	pipe := r.rdb.Pipeline()
 
 	if len(uids) > 0 {
 		pipe.HDel(ctx, UserIpMappingCacheKey, uids...)

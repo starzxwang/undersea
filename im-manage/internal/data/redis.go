@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"undersea/im-balance/conf"
+	"undersea/im-manage/conf"
 )
 
 func NewRedisClient(ctx context.Context, conf conf.Conf) (rdb *redis.Client, err error) {

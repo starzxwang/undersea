@@ -7,7 +7,6 @@ import (
 	v1 "undersea/api/im-balance/v1"
 	"undersea/im-manage/conf"
 	"undersea/pkg/log"
-	"undersea/pkg/util"
 )
 
 const (
@@ -45,20 +44,35 @@ func (g *GrpcClient) Start(ctx context.Context) error {
 }
 
 func (g *GrpcClient) balanceHeartBeat() {
-	ticker := time.Tick(g.conf.Ws.HeartBeatInterval)
+	ticker := time.NewTicker(g.conf.Ws.HeartBeatInterval)
 	ctx := context.Background()
-	for range ticker {
-		_, err := g.imBalanceGrpcClient.Ping(ctx, &v1.PingReq{
-			ServiceName: ServiceName,
-			Ip:          util.GetIpAddr(),
-		})
+	isInit := true
+	for {
+		select {
+		case <-ticker.C:
+			_, err := g.imBalanceGrpcClient.Ping(ctx, &v1.PingReq{
+				ServiceName: ServiceName,
+				Ip:          g.getWsIp(),
+			})
+			if err != nil {
+				log.E(ctx, err).Msgf("balanceHeartBeat->ping err")
+				time.Sleep(time.Second * 2)
+			}
+		default:
+			if isInit {
+				_, err := g.imBalanceGrpcClient.Ping(ctx, &v1.PingReq{
+					ServiceName: ServiceName,
+					Ip:          g.getWsIp(),
+				})
+				if err != nil {
+					log.E(ctx, err).Msgf("balanceHeartBeat->ping err")
+					time.Sleep(time.Second * 2)
+				}
 
-		if err != nil {
-			log.E(ctx, err).Msgf("balanceHeartBeat->ping err")
-			time.Sleep(time.Second)
-			continue
+				isInit = false
+			}
+
 		}
-
 	}
 }
 
@@ -66,4 +80,8 @@ func (g *GrpcClient) Stop(ctx context.Context) error {
 	g.conn.Close()
 	log.I(ctx).Msgf("[%s] client stopping", g.Name())
 	return nil
+}
+
+func (g *GrpcClient) getWsIp() string {
+	return "ws://" + g.conf.Ws.Addr + "/ws"
 }

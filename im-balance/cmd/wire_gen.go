@@ -28,7 +28,7 @@ func initApp() (*app, error) {
 	heartBeatUseCase := biz.NewHeartBeatUseCase(confConf, balanceRepo)
 	heartBeatServiceServer := service.NewHeartBeatService(confConf, heartBeatUseCase)
 	grpcServer := server.NewGrpcServer(confConf, heartBeatServiceServer)
-	balanceUseCase := biz.NewBalanceUseCase(confConf)
+	balanceUseCase := biz.NewBalanceUseCase(confConf, balanceRepo)
 	balanceService := service.NewBalanceService(contextContext, balanceUseCase)
 	websocketServer := server.NewWebsocketServer(confConf, balanceService)
 	mainApp := newApp(contextContext, grpcServer, websocketServer)

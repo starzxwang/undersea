@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/websocket"
+	"undersea/pkg/api"
 	"undersea/pkg/log"
 )
 
@@ -22,13 +23,20 @@ const (
 	MesTypeHeartBeat           = "HEART_BEAT"             // im的心跳
 	MesTypePickIp              = "PICK_IP"                // 客户端向im_balance获取ip
 	MesTypeReplyPickIp         = "REPLY_PICK_IP"
+	MesTypeReplyException      = "REPLY_EXCEPTION" // 服务内部异常导致
 )
 
 type Message struct {
-	Id     string `json:"msg_id,omitempty"`
-	Type   string `json:"type"`
-	Data   string `json:"data"`
-	Length int    `json:"length"`
+	Id   string `json:"msg_id,omitempty"`
+	Type string `json:"type"`
+	Data string `json:"data"`
+	Len  int    `json:"len"`
+}
+
+type ReplyMessageData struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 type HeartBeatMessage struct {
@@ -37,15 +45,17 @@ type HeartBeatMessage struct {
 }
 
 type PickIpMessage struct {
-	Uid int `json:"uid"`
-}
-
-type PickIpReplyMessage struct {
-	Ip string `json:"ip"`
+	ServiceName string `json:"service_name"`
+	Uid         int    `json:"uid"`
 }
 
 type LoginMessage struct {
 	Uid int `json:"uid"`
+}
+
+type PickIpReplyMessage struct {
+	Ip  string `json:"ip"`
+	Uid int    `json:"uid"`
 }
 
 func ConvertBytes2Message(ctx context.Context, data []byte) (mes *Message, err error) {
@@ -55,7 +65,7 @@ func ConvertBytes2Message(ctx context.Context, data []byte) (mes *Message, err e
 		return
 	}
 
-	if mes.Length != len(mes.Data) {
+	if mes.Len != len(mes.Data) {
 		err = errors.New("json.Unmarshal err")
 		log.E(ctx, err).Msgf("json.Unmarshal err")
 		return
@@ -78,12 +88,20 @@ func formatMessage(ctx context.Context, msgData interface{}, msgType string, msg
 		Data: string(dataBytes),
 	}
 
-	mes.Length = len(mes.Data)
+	mes.Len = len(mes.Data)
 	return
 }
 
+// 发送服务异常消息给前端
+func SendExceptionWebsocketMessage(ctx context.Context, conn *websocket.Conn) (err error) {
+	return SendWebSocketMessage(ctx, conn, &ReplyMessageData{
+		Code:    api.CodeException,
+		Message: "服务开小差了，请稍候重试",
+	}, MesTypeReplyException, "")
+}
+
 // 发送websocket消息
-func SendWebSocketMessage(ctx context.Context, conn *websocket.Conn, msgData interface{}, msgType, msgId string) (err error) {
+func SendWebSocketMessage(ctx context.Context, conn *websocket.Conn, msgData *ReplyMessageData, msgType, msgId string) (err error) {
 	mes, err := formatMessage(ctx, msgData, msgType, msgId)
 	if err != nil {
 		log.E(ctx, err).Msgf("formatMessage err")
@@ -96,7 +114,7 @@ func SendWebSocketMessage(ctx context.Context, conn *websocket.Conn, msgData int
 		return
 	}
 
-	log.I(ctx).Msgf("服务端返回客户端消息=%v", mes)
+	log.I(ctx).Msgf("服务端返回客户端消息=%v", string(mesBytes))
 
 	err = sendWebSocketByteMessage(ctx, conn, mesBytes)
 	if err != nil {

@@ -24,8 +24,8 @@ type WebsocketServer struct {
 	manageService *service.ManageService
 }
 
-func NewWebsocketServer(conf conf.Conf) *WebsocketServer {
-	return &WebsocketServer{conf: conf}
+func NewWebsocketServer(conf conf.Conf, manageService *service.ManageService) *WebsocketServer {
+	return &WebsocketServer{conf: conf, manageService: manageService}
 }
 
 func (s *WebsocketServer) Name() string {
@@ -37,7 +37,7 @@ func (s *WebsocketServer) Start(ctx context.Context) (err error) {
 	http.HandleFunc("/ws", s.wsHandler)
 
 	//服务端启动
-	log.I(ctx).Msgf("[%s]负载均衡模块开始监听websocket端口：%s", s.Name(), s.conf.Ws.Addr)
+	log.I(ctx).Msgf("[%s]消息管理模块开始监听websocket端口：%s", s.Name(), s.conf.Ws.Addr)
 	err = http.ListenAndServe(s.conf.Ws.Addr, nil)
 	if err != nil {
 		log.E(ctx, err).Msgf("websocket start err")

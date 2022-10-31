@@ -42,29 +42,30 @@ func (uc *HeartBeatUseCase) SaveHeartBeat(mes *message.HeartBeatMessage) {
 		}
 		serviceIpMap.Store(mes.Ip, heartBeatItem)
 		imServer.ipMap.Store(mes.ServiceName, &serviceIpMap)
-		go uc.listenImHeartBeat(mes.Ip, heartBeatItem)
+		go uc.listenImHeartBeat(mes, heartBeatItem)
 		return
 	}
 
-	v, ok = v.(*sync.Map).Load(mes.Ip)
+	v2, ok := v.(*sync.Map).Load(mes.Ip)
 	if ok {
 		// 心跳
-		v.(chan struct{}) <- struct{}{}
+		v2.(*HeartBeatItem).pingChan <- struct{}{}
 	} else {
 		// 开启协程监听这个im节点
 		heartBeatItem := &HeartBeatItem{
 			pingChan:     make(chan struct{}, 1),
 			lastPingTime: time.Now(),
 		}
-		imServer.ipMap.Store(mes.Ip, heartBeatItem)
-		go uc.listenImHeartBeat(mes.Ip, heartBeatItem)
+		v.(*sync.Map).Store(mes.Ip, heartBeatItem)
+		imServer.ipMap.Store(mes.ServiceName, v)
+		go uc.listenImHeartBeat(mes, heartBeatItem)
 	}
 
 	return
 }
 
 // 监听当前im节点的心跳
-func (uc *HeartBeatUseCase) listenImHeartBeat(ip string, heartBeatItem *HeartBeatItem) {
+func (uc *HeartBeatUseCase) listenImHeartBeat(mes *message.HeartBeatMessage, heartBeatItem *HeartBeatItem) {
 	ctx := context.Background()
 	online := true
 	for online {
@@ -74,13 +75,13 @@ func (uc *HeartBeatUseCase) listenImHeartBeat(ip string, heartBeatItem *HeartBea
 		default:
 			if time.Now().Sub(heartBeatItem.lastPingTime) > uc.conf.Grpc.HeartBeatInterval {
 				// 删除redis和本地缓存
-				err := uc.balanceRepo.DeleteIp(ctx, ip)
+				err := uc.balanceRepo.DeleteIp(ctx, mes.Ip)
 				if err != nil {
 					log.E(ctx, err).Msgf("listenImHeartBeat->DeleteIp err")
 					time.Sleep(3 * time.Second)
 					continue
 				}
-				imServer.ipMap.Delete(ip)
+				imServer.ipMap.Delete(mes.ServiceName)
 				online = false
 			}
 		}
