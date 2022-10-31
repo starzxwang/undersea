@@ -31,6 +31,7 @@ func (s *HttpServer) Start(ctx context.Context) error {
 	baseGroup.Use(api.Cors())
 	baseGroup.POST("/v1/login", s.userService.Login)
 	baseGroup.POST("/v1/register", s.userService.Register)
+	baseGroup.GET("/v1/friends/:uid", s.userService.GetFriends)
 
 	err := e.Run(s.conf.Http.Addr)
 	if err != nil {

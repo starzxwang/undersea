@@ -41,3 +41,16 @@ func ConvertUserDO2PO(user *do.User) *User {
 		CreatedAt: user.CreatedAt,
 	}
 }
+
+func ConvertUsersPO2DO(users []*User) (ret []*do.User) {
+	if len(users) == 0 {
+		return []*do.User{}
+	}
+
+	ret = make([]*do.User, 0, len(users))
+	for _, user := range users {
+		ret = append(ret, ConvertUserPO2DO(user))
+	}
+
+	return
+}

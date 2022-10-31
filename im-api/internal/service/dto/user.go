@@ -27,6 +27,10 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type GetFriendsReq struct {
+	Uid int `uri:"uid"`
+}
+
 func ConvertUserDO2DTO(userDO *do.User) *User {
 	return &User{
 		Id:        userDO.Id,
@@ -34,4 +38,13 @@ func ConvertUserDO2DTO(userDO *do.User) *User {
 		Name:      userDO.Name,
 		CreatedAt: userDO.CreatedAt,
 	}
+}
+
+func ConvertUsersDO2DTO(usersDO []*do.User) []*User {
+	ret := make([]*User, 0, len(usersDO))
+	for _, userDO := range usersDO {
+		ret = append(ret, ConvertUserDO2DTO(userDO))
+	}
+
+	return ret
 }

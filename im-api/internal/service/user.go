@@ -18,11 +18,17 @@ func NewUserService(userUseCase *biz.UserUseCase) *UserService {
 	}
 }
 
+// 登录
 func (s *UserService) Login(c *gin.Context) {
 	var req dto.LoginReq
 	err := c.ShouldBind(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, api.Failed(api.CodeParamError, err.Error(), nil))
+		return
+	}
+
+	if req.Username == "" || req.Password == "" {
+		c.JSON(http.StatusBadRequest, api.Failed(api.CodeParamError, "参数不能为空", nil))
 		return
 	}
 
@@ -36,11 +42,17 @@ func (s *UserService) Login(c *gin.Context) {
 	return
 }
 
+// 注册
 func (s *UserService) Register(c *gin.Context) {
 	var req dto.RegisterReq
 	err := c.ShouldBind(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, api.Failed(api.CodeParamError, err.Error(), nil))
+		return
+	}
+
+	if req.Username == "" || req.Password == "" || req.Avatar == "" {
+		c.JSON(http.StatusBadRequest, api.Failed(api.CodeParamError, "参数不能为空", nil))
 		return
 	}
 

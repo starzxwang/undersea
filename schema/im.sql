@@ -14,3 +14,15 @@ CREATE TABLE IF NOT EXISTS im_user (
     updated_at datetime not null default current_timestamp(),
     index idx_name on(`name`)
 ) engine=innodb charset=utf8mb4;
+
+-- 创建群组用户表（单聊，普通群聊）
+CREATE TABLE IF NOT EXISTS im_small_group_user (
+    id int primary key auto_increment,
+    gid varchar(32) not null default '' comment '群组id',
+    uid int not null default 0 comment '用户id',
+    deleted tinyint not null default 0 comment '是否删除',
+    created_at datetime not null default current_timestamp(),
+    updated_at datetime not null default current_timestamp(),
+    index idx_gid (gid),
+    index idx_uid (uid)
+) engine=innodb charset=utf8mb4;
