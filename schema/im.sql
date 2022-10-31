@@ -26,3 +26,14 @@ CREATE TABLE IF NOT EXISTS im_small_group_user (
     index idx_gid (gid),
     index idx_uid (uid)
 ) engine=innodb charset=utf8mb4;
+
+-- 创建好友表
+CREATE TABLE IF NOT EXISTS im_friend (
+     id int primary key auto_increment,
+     friend_id int not null default 0 comment '好友id',
+     uid int not null default 0 comment '用户id',
+     deleted tinyint not null default 0 comment '是否删除',
+     created_at datetime not null default current_timestamp(),
+    updated_at datetime not null default current_timestamp(),
+    index idx_uid (uid)
+) engine=innodb charset=utf8mb4;

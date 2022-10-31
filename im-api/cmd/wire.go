@@ -21,9 +21,13 @@ func initApp() (*app, error) {
 		server2.NewHttpServer,
 		service.NewUserService,
 		service.NewGroupUserService,
+		service.NewFriendService,
 		biz.NewUserUseCase,
 		biz.NewGroupUseCase,
+		biz.NewFriendUseCase,
 		data.NewMysql,
 		data.NewUserRepo,
+		data.NewGroupUserRepo,
+		data.NewFriendRepo,
 	))
 }

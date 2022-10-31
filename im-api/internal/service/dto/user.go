@@ -27,10 +27,6 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type GetFriendsReq struct {
-	Uid int `uri:"uid"`
-}
-
 func ConvertUserDO2DTO(userDO *do.User) *User {
 	return &User{
 		Id:        userDO.Id,

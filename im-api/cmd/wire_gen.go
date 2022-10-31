@@ -27,7 +27,13 @@ func initApp() (*app, error) {
 	userRepo := data.NewUserRepo(db)
 	userUseCase := biz.NewUserUseCase(userRepo)
 	userService := service.NewUserService(userUseCase)
-	httpServer := server.NewHttpServer(confConf, userService)
+	groupUserRepo := data.NewGroupUserRepo(db, userRepo)
+	groupUserUseCase := biz.NewGroupUseCase(groupUserRepo)
+	groupUserService := service.NewGroupUserService(groupUserUseCase)
+	friendRepo := data.NewFriendRepo(db, userRepo)
+	friendUseCase := biz.NewFriendUseCase(friendRepo)
+	friendService := service.NewFriendService(friendUseCase)
+	httpServer := server.NewHttpServer(confConf, userService, groupUserService, friendService)
 	mainApp := newApp(contextContext, httpServer)
 	return mainApp, nil
 }

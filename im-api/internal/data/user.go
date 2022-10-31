@@ -47,6 +47,9 @@ func (r *UserRepo) Register(ctx context.Context, user *do.User) (id int, err err
 }
 
 func (r *UserRepo) GetUsersByIds(ctx context.Context, ids []int) (users []*do.User, err error) {
+	if len(ids) == 0 {
+		return []*do.User{}, nil
+	}
 	var poUsers []*po.User
 	err = r.db.WithContext(ctx).Where("id in(?) and deleted=?", ids, false).Find(&poUsers).Error
 	if err != nil {

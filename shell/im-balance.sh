@@ -16,8 +16,8 @@ then
   fi
 
 # 准备建立新程序
-go build -o ${GOPATH}/bin/im-manage ./im-balance/cmd
+go build -o ${GOPATH}/bin/im-balance ./im-balance/cmd
 
-nohup ${GOPATH}/bin/im-manage > ${GOPATH}/log/im-balance.log 2>&1 &
+nohup ${GOPATH}/bin/im-balance > ${GOPATH}/log/im-balance.log 2>&1 &
 
 

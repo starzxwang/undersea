@@ -62,4 +62,5 @@ func (uc *UserUseCase) Register(ctx context.Context, username, pwd, avatar strin
 type UserRepo interface {
 	GetUserByName(ctx context.Context, username string) (user *do.User, err error)
 	Register(ctx context.Context, user *do.User) (id int, err error)
+	GetUsersByIds(ctx context.Context, ids []int) (users []*do.User, err error)
 }

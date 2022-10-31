@@ -10,14 +10,19 @@ import (
 )
 
 type HttpServer struct {
-	conf        conf.Conf
-	userService *service.UserService
+	conf             conf.Conf
+	userService      *service.UserService
+	groupUserService *service.GroupUserService
+	friendService    *service.FriendService
 }
 
-func NewHttpServer(conf conf.Conf, userService *service.UserService) *HttpServer {
+func NewHttpServer(conf conf.Conf, userService *service.UserService,
+	groupUserService *service.GroupUserService, friendService *service.FriendService) *HttpServer {
 	return &HttpServer{
-		conf:        conf,
-		userService: userService,
+		conf:             conf,
+		userService:      userService,
+		groupUserService: groupUserService,
+		friendService:    friendService,
 	}
 }
 
@@ -31,7 +36,8 @@ func (s *HttpServer) Start(ctx context.Context) error {
 	baseGroup.Use(api.Cors())
 	baseGroup.POST("/v1/login", s.userService.Login)
 	baseGroup.POST("/v1/register", s.userService.Register)
-	baseGroup.GET("/v1/friends/:uid", s.userService.GetFriends)
+	baseGroup.GET("/v1/friends/:uid", s.friendService.GetFriends)
+	baseGroup.POST("/v1/friend", s.friendService.AddFriend)
 
 	err := e.Run(s.conf.Http.Addr)
 	if err != nil {
